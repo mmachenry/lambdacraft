@@ -1,2 +1,2 @@
 # lambdacraft
-Infrastructure for the LambdaCraft Minecraft server.
+Infrastructure for the Lambdacraft Minecraft server.
