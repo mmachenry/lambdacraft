@@ -1,3 +1,4 @@
 #!/bin/bash
 
+/start
 curl https://us-central1-minecraft-experimentation.cloudfunctions.net/stopInstance
