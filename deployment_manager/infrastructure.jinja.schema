@@ -1,0 +1,20 @@
+info:
+  title: Lambdacraft GCP infrastructure template
+  version: 1.0.0
+  description: >-
+    Deploys a cost-conscious Minecraft server, which automatically starts and
+    stops as players attempt to join and leave the server.
+
+additionalProperties: false
+
+properties:
+  zone:
+    type: string
+    description: >-
+      GCP zone in which to run the infrastructure.
+    default: us-central1-a
+  machineType:
+    type: string
+    description: >-
+      GCE instance type on which to run Minecraft.
+    default: e2-medium
