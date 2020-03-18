@@ -1,4 +1,4 @@
-.PHONY build run deploy start
+.PHONY: build run deploy start stop
 
 build:
 	docker build -t lambdacraft2 .
@@ -12,3 +12,7 @@ deploy: build
 
 start:
 	curl https://us-central1-minecraft-experimentation.cloudfunctions.net/startInstance
+
+stop:
+	curl https://us-central1-minecraft-experimentation.cloudfunctions.net/stopInstance
+
