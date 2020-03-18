@@ -1,22 +1,22 @@
 import System.Process (readProcess)
 import Control.Concurrent (threadDelay)
+import Control.Monad (void)
 import Data.List (isPrefixOf)
 import System.Environment (getEnv)
-import Network.Wreq (get)
 
 main :: IO ()
-main = do
-    port <- getEnv "RCON_PORT"
-    putStrLn port
-    stopInactiveServer 0
-    shutdownVM
+main = stopInactiveServer 0
 
 -- A wrapper around readProcess to call the rcon-cli script with given args.
 rcon :: [String] -> IO String
-rcon cmds =
+rcon cmds = do
+    port <- getEnv "RCON_PORT"
+    host <- getEnv "LAMBDACRAFT_HOST"
     readProcess
-        "/home/mmachenry/bin/rcon-cli"
-        (["--password", "minecraft"] ++ cmds)
+        "/rcon-cli"
+        (["--password", "minecraft",
+          "--port", port,
+          "--host", host] ++ cmds)
         ""
 
 -- Infinitely loops to check server activity. Upon multi loops with no activity
@@ -42,11 +42,5 @@ serverIsInactive = do
 -- Connects to server with rcon, announces shutdown and issues stop command.
 stopServer :: IO ()
 stopServer = do
-    _ <- rcon ["say", "The server is inactive. Stopping."]
-    _ <- rcon ["stop"]
-    return ()
-
-shutdownVM :: IO ()
-shutdownVM = do
-    r <- get "https://us-central1-minecraft-experimentation.cloudfunctions.net/stopInstance"
-    print r
+    void $ rcon ["say", "The server is inactive. Stopping."]
+    void $ rcon ["stop"]
