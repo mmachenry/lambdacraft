@@ -1,5 +1,5 @@
-FROM itzg/minecraft-server
+FROM itzg/minecraft-server:multiarch
 ENV EULA TRUE
-ENV VERSION 1.15.2
-#ENV VERSION 1.13.2
-#ENV TYPE SPIGOT
+#ENV VERSION 1.15.2
+ENV VERSION 1.13.2
+ENV TYPE SPIGOT
