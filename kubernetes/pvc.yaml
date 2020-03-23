@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-lambdacraft
+spec:
+  # TODO: May want to change persistentVolumeReclaimPolicy so that the volume
+  # with our world isn't lost if the cluster is deleted.
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
