@@ -1,11 +1,15 @@
 import System.Process (readProcess)
+import System.IO (hSetBuffering, stdout, BufferMode(..))
 import Control.Concurrent (threadDelay)
 import Control.Monad (void)
 import Data.List (isPrefixOf)
 import System.Environment (getEnv)
 
 main :: IO ()
-main = stopInactiveServer 0
+main = do
+    hSetBuffering stdout NoBuffering
+    threadDelay (2 * 60 * 1000000)
+    stopInactiveServer 0
 
 -- A wrapper around readProcess to call the rcon-cli script with given args.
 rcon :: [String] -> IO String
