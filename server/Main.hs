@@ -7,11 +7,7 @@ import System.Posix.Daemonize (daemonize)
 import System.Environment (getArgs)
 
 main :: IO ()
-main = daemonize monitorServer
-
--- The main process to monitor the server and shut it down if it's inactive
-monitorServer :: IO ()
-monitorServer = stopInactiveServer 0
+main = daemonize $ stopInactiveServer 0
 
 -- A wrapper around readProcess to call the rcon-cli script with given args.
 rcon :: [String] -> IO String
