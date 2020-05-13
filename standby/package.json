@@ -1,0 +1,25 @@
+{
+  "name": "standby",
+  "version": "1.0.0",
+  "description": "A standby server that can start the main server when needed.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmachenry/lambdacraft.git"
+  },
+  "keywords": [
+    "minecraft"
+  ],
+  "author": "Mike MacHenry",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmachenry/lambdacraft/issues"
+  },
+  "homepage": "https://github.com/mmachenry/lambdacraft#readme",
+  "dependencies": {
+    "minecraft-protocol": "^1.11.0"
+  }
+}
