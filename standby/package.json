@@ -21,6 +21,7 @@
   "homepage": "https://github.com/mmachenry/lambdacraft#readme",
   "dependencies": {
     "@google-cloud/compute": "^1.2.0",
+    "@google-cloud/dns": "^2.0.0",
     "minecraft-protocol": "^1.11.0"
   }
 }
