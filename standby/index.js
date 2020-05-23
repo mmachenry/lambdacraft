@@ -28,23 +28,28 @@ var counter = 0;
 server.on('connection', (client) => {
     server.motd = "Lambdacraft Standby Server: " + counter++
     console.log(`Received connection number ${counter}.`)
+    // Don't try to start the server multiple times.
+    if (counter > 1) {
+        return
+    }
 
     vm.start()
-    .then((vm_response) => {
-        const operation = vm_response[0]
-        const apiResponse = vm_response[1]
-        console.log(operation)
-        console.log(apiResponse)
-        const newIp = "127.0.0.1"
+    .then(() => {
+        return vm.waitFor('RUNNING')
+    }).then(() => {
+        return vm.get()        
+    }).then((data) => {
+        const response = data[1];
+        const newIp = response.networkInterfaces[0].accessConfigs[0].natIP
         const newARecord = dnsZone.record('a', {
             name: 'ninjavitis.com.',
             data: newIp,
             ttl: ttl
         })
+
         return dnsZone.replaceRecords('a', newARecord)
-    }).then((dns_response) => {
-        const change = dns_response[0];
-        const apiResponse = dns_response[1];
+    }).then(() => {
+        // May want to wait for DNS update to complete and log it here.
     }).catch((err) => {
         console.log(err)
     })
