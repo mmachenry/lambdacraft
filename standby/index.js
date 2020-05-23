@@ -24,33 +24,28 @@ var server = mc.createServer({
     motd: 'Lambdacraft standby server',
 });
 
-function updateDns(newIp) {
-      const newARecord = dnsZone.record('a', {
-        name: 'ninjavitis.com.',
-        data: newIp,
-        ttl: ttl
-      });
-
-      dnsZone.replaceRecords('a', newARecord).then((data) => {
-        const change = data[0];
-        const apiResponse = data[1];
-      });
-}
-
 var counter = 0;
 server.on('connection', (client) => {
     server.motd = "Lambdacraft Standby Server: " + counter++
-    console.log(`Received connection number ${counter}.`);
+    console.log(`Received connection number ${counter}.`)
 
-    vm
-        .start()
-        .then((data) => {
-            const operation = data[0];
-            const apiResponse = data[1];
-            console.log(operation);
-            console.log(apiResponse);
+    vm.start()
+    .then((vm_response) => {
+        const operation = vm_response[0]
+        const apiResponse = vm_response[1]
+        console.log(operation)
+        console.log(apiResponse)
+        const newIp = "127.0.0.1"
+        const newARecord = dnsZone.record('a', {
+            name: 'ninjavitis.com.',
+            data: newIp,
+            ttl: ttl
         })
-        .catch(() => {
-            console.log(`something bad happened during VM startup.`)
-        });
-});
+        return dnsZone.replaceRecords('a', newARecord)
+    }).then((dns_response) => {
+        const change = dns_response[0];
+        const apiResponse = dns_response[1];
+    }).catch((err) => {
+        console.log(err)
+    })
+})
