@@ -1,96 +1,61 @@
-provider "google" {
-  version = "3.24.0"
+# Contains the common Terraform resources needed by our Minecraft instance.
 
-  credentials = file(var.credentials_file)
+provider "google" {
+  version = "3.25.0"
 
   project = var.project
   region  = var.region
   zone    = var.zone
 }
 
-resource "google_compute_network" "vpc_network" {
-  name = "minecraft-network"
-}
-
-resource "google_compute_instance" "minecraft_instance" {
-  name         = "minecraft-instance"
-  machine_type = var.minecraft_instance_type
-  zone = var.zone
-
-  boot_disk {
-    initialize_params {
-      image = "cos-cloud/cos-stable"
-    }
-  }
-
-  network_interface {
-    network = google_compute_network.vpc_network.self_link
-    access_config { }
-  }
-
-  metadata = {
-    gce-container-declaration = <<-EOT
-      spec:
-        restartPolicy: Never
-        volumes:
-        - name: pd-0
-          gcePersistentDisk:
-            pdName: $(ref.lambdacraft-persistence.name)
-            fsType: ext4
-            partition: 0
-        containers:
-        - name: minecraft-server
-          image: us.gcr.io/minecraft-experimentation/lambdacraft
-          imagePullPolicy: Always
-          volumeMounts:
-          - name: pd-0
-            mountPath: /data
-      EOT
-  }
-
-  attached_disk {
-    source = google_compute_disk.persistence_disk.self_link
-  }
-  # service_account
-  # attached_disk
-}
-
-resource "google_compute_disk" "persistence_disk" {
-  name = "minecraft-persistence"
-  zone = var.zone
-  type = "pd-standard"
-  size = 10
-}
-
-resource "google_compute_instance" "standby_instance" {
-  name         = "standby-instance"
-  machine_type = "e2-micro"
-  zone = var.zone
-
-  boot_disk {
-    initialize_params {
-      image = "cos-cloud/cos-stable"
-    }
-  }
-
-  network_interface {
-    network = google_compute_network.vpc_network.self_link
-    access_config {
-      nat_ip = google_compute_address.standby_ip.address
-    }
-  }
-
-  scheduling {
-    preemptible = true
-    automatic_restart = false
+terraform {
+  backend "gcs" {
+    # Can't use a variable here since this runs before all other Terraform code.
+    bucket  = "lambdacraft-test-terraform-state"
   }
 }
 
-resource "google_compute_address" "standby_ip" {
-  name = "terraform-static-ip"
+# Note - since this bucket stores Terraform state, it needs to be initialized prior to the rest of
+# the infrastructure. It probably shouldn't be managed by Terraform for that reason, but I don't
+# know what I'm doing!
+resource "google_storage_bucket" "terraform_state" {
+  name          = "${var.project}-terraform-state"
+  location      = "US"
+  force_destroy = true
+  bucket_policy_only = true
+  versioning {
+    enabled = true
+  }
 }
 
-# Container Registry
-# GCS (for terraform state storage)
-# DNS config
-# GCE autoscaling group
+# Enable needed APIs. Note this doesn't currently work, as cloudresourcemanager.googleapis.com
+# seems to need to be enabled first.
+resource "google_project_service" "apis" {
+  count   = length(var.gcp_service_list)
+  service = var.gcp_service_list[count.index]
+  disable_dependent_services = true
+}
+
+# Create a bucket for the service registry. This isn't actually needed unless we want to explicitly
+# grant access to this to a service account, as the bucket is created automatically when pushed to.
+resource "google_container_registry" "registry" {
+  location = "US"
+}
+
+# Image used by all our VMs.
+data "google_compute_image" "cos" {
+  family  = "cos-stable"
+  project = "cos-cloud"
+}
+
+resource "google_service_account" "minecraft_account" {
+  account_id  = "minecraft-service-account"
+  description = "Used by all Minecraft VM resources."
+}
+
+# It would be nice if we could limit this further. Maybe a custom role?
+resource "google_project_iam_member" "iam_compute" {
+  count   = length(var.sa_roles)
+  role    = var.sa_roles[count.index]
+  member  = "serviceAccount:${google_service_account.minecraft_account.email}"
+}

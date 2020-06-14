@@ -21,4 +21,33 @@ variable "minecraft_instance_type" {
   default = "e2-standard-2"
 }
 
-variable "credentials_file" { }
+variable "minecraft_image" {
+  description = "Docker image to be run on the Minecraft server VM."
+  default = "itzg/minecraft-server"
+}
+
+variable "standby_image" {
+  description = "Docker image to be run on the standby VM."
+  default = "TDB"
+}
+
+# Convenience variables you probably don't want to override.
+variable "gcp_service_list" {
+  description = "List of GCP service to be enabled for a project."
+  type        = list
+  default = [
+    "cloudresourcemanager.googleapis.com",
+    "compute.googleapis.com",
+    "iam.googleapis.com",
+    "dns.googleapis.com",
+  ]
+}
+
+variable "sa_roles" {
+  description = "Roles to be granted to the Minecraft service account."
+  type        = list
+  default = [
+    "roles/compute.instanceAdmin",
+    "roles/dns.admin",
+  ]
+}

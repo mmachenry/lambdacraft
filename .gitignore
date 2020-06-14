@@ -143,7 +143,6 @@ override.tf.json
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/extensions.json
 *.code-workspace
