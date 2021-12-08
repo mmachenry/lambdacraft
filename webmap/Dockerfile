@@ -9,7 +9,7 @@ RUN git clone https://github.com/overviewer/Minecraft-Overviewer.git
 WORKDIR Minecraft-Overviewer
 RUN python3 setup.py build
 
-ENV VERSION 1.15
+ENV VERSION 1.16.5
 RUN mkdir -p ~/.minecraft/versions/${VERSION}/
 RUN wget https://overviewer.org/textures/${VERSION} -O ~/.minecraft/versions/${VERSION}/${VERSION}.jar
 
