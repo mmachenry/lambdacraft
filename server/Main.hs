@@ -1,4 +1,4 @@
-import System.Process (readProcess)
+import System.Process (readProcessWithExitCode)
 import System.IO (hSetBuffering, stdout, BufferMode(..))
 import Control.Concurrent (threadDelay)
 import Control.Monad (void)
@@ -11,9 +11,11 @@ main = daemonize $ stopInactiveServer 0
 
 -- A wrapper around readProcess to call the rcon-cli script with given args.
 rcon :: [String] -> IO String
-rcon cmds =
-    readProcess "/usr/local/bin/rcon-cli"
+rcon cmds = do
+    (_, stdout, _) <- readProcessWithExitCode
+        "/usr/local/bin/rcon-cli"
         (["--password", "LambdaCraft"] ++ cmds) ""
+    return stdout
 
 -- Infinitely loops to check server activity. Upon multi loops with no activity
 -- it will send a message to shutdown the server and then this loop will also
