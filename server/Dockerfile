@@ -1,8 +1,9 @@
 FROM fpco/stack-build:lts-18.8 as haskell
 ENV STACK_ROOT /home/stackage/.stack
 WORKDIR /opt/build
+COPY stack.yaml package.yaml ./
 COPY Main.hs .
-RUN stack ghc --package process --package hdaemonize -- -optl-static Main.hs
+RUN stack ghc --system-ghc --package hdaemonize -- -optl-static Main.hs
 
 FROM itzg/minecraft-server:latest
 COPY --from=haskell /opt/build/Main /Main

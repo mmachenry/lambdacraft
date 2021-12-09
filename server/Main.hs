@@ -1,10 +1,8 @@
 import System.Process (readProcessWithExitCode)
-import System.IO (hSetBuffering, stdout, BufferMode(..))
 import Control.Concurrent (threadDelay)
 import Control.Monad (void)
 import Data.List (isPrefixOf)
 import System.Posix.Daemonize (daemonize)
-import System.Environment (getArgs)
 
 main :: IO ()
 main = daemonize $ stopInactiveServer 0
@@ -22,10 +20,10 @@ rcon cmds = do
 -- terminate.
 stopInactiveServer :: Int -> IO ()
 stopInactiveServer tries = do
-    threadDelay (2*60*oneSecond)
+    threadDelay (60*oneSecond)
     inactive <- serverIsInactive
     if inactive
-    then if (tries > 2)
+    then if (tries > 15)
          then stopServer
          else stopInactiveServer (tries + 1)
     else stopInactiveServer 0
