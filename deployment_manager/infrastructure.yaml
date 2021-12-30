@@ -1,6 +1,0 @@
-imports:
-- path: infrastructure.jinja
-
-resources:
-- name: infrastructure
-  type: infrastructure.jinja
