@@ -32,6 +32,27 @@ resource "aws_cloudwatch_log_group" "game" {
   name = "game-task"
 }
 
+resource "aws_security_group" "web_server_service" {
+  name = "Lambdacraft Game Server Security Group"
+  description = "Allows Minecraft protocol inbound traffic"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "Minecraft protocol standard port"
+    from_port = 25565
+    to_port = 25565
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0 
+    to_port = 0 
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_ecs_task_definition" "game" {
   family = "game"
   task_role_arn = aws_iam_role.game_task.arn
