@@ -14,12 +14,11 @@ data "aws_ami" "amazn2" {
 }
 
 resource "aws_launch_template" "game" {
-  name_prefix   = "game_"
-  image_id      = data.aws_ami.amazn2.id
-  instance_type = var.game_vm_type
+  name_prefix     = "game_"
+  image_id        = data.aws_ami.amazn2.id
+  instance_type   = var.game_vm_type
+  security_groups = [aws_security_group.game.id]
 }
-#  iam_instance_profile = aws_iam_instance_profile.ecs_agent.name
-#  security_groups      = [aws_security_group.game.id]
 
 resource "aws_autoscaling_group" "game" {
   name                = "game"
@@ -30,8 +29,7 @@ resource "aws_autoscaling_group" "game" {
   max_size         = 1
 
   launch_template {
-    id      = aws_launch_template.game.id
-    version = "$Latest"
+    id = aws_launch_template.game.id
   }
 }
 
