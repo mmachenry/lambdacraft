@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket         = "lambdacraft-terraform-state"
     key            = "global/s3/terraform.tfstate"
-    region         = "us-east-1"
+    region         = "us-east-1" # Can't use a variable here - maybe an env var?
     dynamodb_table = "lambdacraft-terraform-locks"
     encrypt        = true
   }

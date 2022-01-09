@@ -4,19 +4,19 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "subnet_a" {
   vpc_id            = aws_vpc.main.id
-  availability_zone = "us-east-1a"
+  availability_zone = "${var.aws_region}a"
   cidr_block        = "172.31.0.0/20"
 }
 
 resource "aws_subnet" "subnet_b" {
   vpc_id            = aws_vpc.main.id
-  availability_zone = "us-east-1b"
+  availability_zone = "${var.aws_region}b"
   cidr_block        = "172.31.16.0/20"
 }
 
 resource "aws_subnet" "subnet_c" {
   vpc_id            = aws_vpc.main.id
-  availability_zone = "us-east-1c"
+  availability_zone = "${var.aws_region}c"
   cidr_block        = "172.31.32.0/20"
 }
 
