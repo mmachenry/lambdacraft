@@ -30,6 +30,7 @@ resource "aws_iam_role_policy_attachment" "game_task" {
 
 resource "aws_cloudwatch_log_group" "game" {
   name = "game-task"
+  retention_in_days = var.log_retention
 }
 
 resource "aws_security_group" "web_server_service" {
@@ -61,24 +62,20 @@ resource "aws_ecs_task_definition" "game" {
   cpu = "4096"
   memory = "30720"
   requires_compatibilities = ["FARGATE"]
-  container_definitions = <<DEFINITION
-[
-  {
-    "name": "game-container",
-    "image": "${aws_ecr_repository.game.repository_url}:latest",
-    "environment": [
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "${aws_cloudwatch_log_group.game.name}",
-        "awslogs-region": "${var.aws_region}",
-        "awslogs-stream-prefix": "ecs"
+  container_definitions = jsonencode([
+    {
+      name = "game-container"
+      image = "${aws_ecr_repository.game.repository_url}:latest"
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group = aws_cloudwatch_log_group.game.name
+          awslogs-region = var.aws_region
+          awslogs-stream-prefix = "ecs"
+        }
       }
-    },
-    "cpu": 0,
-    "essential": true
-  }
-]
-DEFINITION
+      cpu = 0
+      essential = true
+    }
+  ])
 }

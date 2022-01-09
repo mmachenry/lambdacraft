@@ -16,7 +16,7 @@ resource "aws_iam_role" "startup_lambda" {
 
 resource "aws_cloudwatch_log_group" "startup_lambda" {
   name = "/aws/lambda/${aws_lambda_function.startup.function_name}"
-  retention_in_days = 14
+  retention_in_days = var.log_retention
 }
 
 data "aws_iam_policy_document" "startup_lambda" {
