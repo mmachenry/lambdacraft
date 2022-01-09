@@ -14,10 +14,10 @@ data "aws_ami" "amazn2" {
 }
 
 resource "aws_launch_template" "game" {
-  name_prefix     = "game_"
-  image_id        = data.aws_ami.amazn2.id
-  instance_type   = var.game_vm_type
-  security_groups = [aws_security_group.game.id]
+  name_prefix            = "game_"
+  image_id               = data.aws_ami.amazn2.id
+  instance_type          = var.game_vm_type
+  vpc_security_group_ids = [aws_security_group.game.id]
 }
 
 resource "aws_autoscaling_group" "game" {
