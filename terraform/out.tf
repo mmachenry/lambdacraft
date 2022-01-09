@@ -4,5 +4,5 @@ output "game_repository_url" {
 
 output "base_url" {
   description = "Base URL for API Gateway."
-  value = aws_apigatewayv2_stage.prod.invoke_url
+  value       = aws_apigatewayv2_stage.prod.invoke_url
 }
