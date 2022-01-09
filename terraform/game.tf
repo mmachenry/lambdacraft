@@ -33,7 +33,7 @@ resource "aws_cloudwatch_log_group" "game" {
   retention_in_days = var.log_retention
 }
 
-resource "aws_security_group" "web_server_service" {
+resource "aws_security_group" "game" {
   name        = "Lambdacraft Game Server Security Group"
   description = "Allows Minecraft protocol inbound traffic"
   vpc_id      = aws_vpc.main.id

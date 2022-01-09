@@ -11,6 +11,7 @@ def handler (event, callback):
         networkConfiguration = {
             "awsvpcConfiguration": {
                 "subnets": os.getenv("SUBNET_IDS", "").split(","),
+                "securityGroups": [os.getenv("SECURITY_GROUP_ID")],
                 "assignPublicIp": "ENABLED",
             },
         },
