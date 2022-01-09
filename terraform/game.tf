@@ -1,3 +1,40 @@
+data "aws_ami" "amazn2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "manifest-location"
+    values = ["amazon/amzn2-ami-kernel-5.10-hvm-*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"] # TODO: Determine this by EC2 machine type.
+  }
+}
+
+resource "aws_launch_template" "game" {
+  name_prefix   = "game_"
+  image_id      = data.aws_ami.amazn2.id
+  instance_type = var.game_vm_type
+}
+#  iam_instance_profile = aws_iam_instance_profile.ecs_agent.name
+#  security_groups      = [aws_security_group.game.id]
+
+resource "aws_autoscaling_group" "game" {
+  name                = "game"
+  vpc_zone_identifier = [aws_subnet.subnet_a.id]
+
+  desired_capacity = 0
+  min_size         = 0
+  max_size         = 1
+
+  launch_template {
+    id      = aws_launch_template.game.id
+    version = "$Latest"
+  }
+}
+
 resource "aws_ecr_repository" "game" {
   name = "game-repository"
 }
