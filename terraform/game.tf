@@ -18,6 +18,7 @@ resource "aws_launch_template" "game" {
   image_id               = data.aws_ami.amazn2.id
   instance_type          = var.game_vm_type
   vpc_security_group_ids = [aws_security_group.game.id]
+  ebs_optimized          = true
 }
 
 resource "aws_autoscaling_group" "game" {
@@ -29,7 +30,8 @@ resource "aws_autoscaling_group" "game" {
   max_size         = 1
 
   launch_template {
-    id = aws_launch_template.game.id
+    id      = aws_launch_template.game.id
+    version = "$Default"
   }
 
   # This is automatically added by the ECS capacity provider, so we need to
@@ -45,7 +47,7 @@ resource "aws_ecs_capacity_provider" "game" {
   name = "Lambdacraft-Game-Cluster-Capacity-Provider"
 
   auto_scaling_group_provider {
-    auto_scaling_group_arn = aws_autoscaling_group.game.arn
+    auto_scaling_group_arn         = aws_autoscaling_group.game.arn
     managed_termination_protection = "ENABLED"
 
     managed_scaling {
@@ -61,13 +63,13 @@ resource "aws_ecs_service" "game" {
   desired_count   = 0
 
   capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.game.arn
+    capacity_provider = aws_ecs_capacity_provider.game.name
     weight            = 1
   }
 
   network_configuration {
-    subnets          = [ aws_subnet.subnet_a.id, aws_subnet.subnet_b.id, aws_subnet.subnet_c.id ]
-    security_groups  = [aws_security_group.game.id]
+    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id, aws_subnet.subnet_c.id]
+    security_groups = [aws_security_group.game.id]
   }
 }
 
@@ -133,8 +135,8 @@ resource "aws_ecs_task_definition" "game" {
   task_role_arn            = aws_iam_role.game_task.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   network_mode             = "awsvpc"
-  cpu                      = "2048"
-  memory                   = "6144"
+  cpu                      = "1024"
+  memory                   = "4096"
   requires_compatibilities = ["EC2"]
   container_definitions = jsonencode([
     {
