@@ -126,7 +126,7 @@ resource "aws_ecs_task_definition" "game" {
   network_mode             = "awsvpc"
   cpu                      = "4096"
   memory                   = "30720"
-  requires_compatibilities = ["FARGATE"]
+  requires_compatibilities = ["EC2"]
   container_definitions = jsonencode([
     {
       name  = "game-container"
