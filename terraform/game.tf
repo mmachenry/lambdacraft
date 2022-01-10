@@ -56,11 +56,43 @@ resource "aws_ecs_capacity_provider" "game" {
   }
 }
 
+resource "aws_iam_role" "game_service" {
+  name               = "lambdacraft-game-service-role"
+  assume_role_policy = data.aws_iam_policy_document.game_service.json
+}
+
+data "aws_iam_policy_document" "game_service" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "application-autoscaling:*",
+      "ecs:DescribeServices",
+      "ecs:UpdateService",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:PutMetricAlarm",
+      "cloudwatch:DeleteAlarms",
+      "cloudwatch:DescribeAlarmHistory",
+      "cloudwatch:DescribeAlarmsForMetric",
+      "cloudwatch:GetMetricStatistics",
+      "cloudwatch:ListMetrics",
+      "cloudwatch:DisableAlarmActions",
+      "cloudwatch:EnableAlarmActions",
+      "iam:CreateServiceLinkedRole",
+      "sns:CreateTopic",
+      "sns:Subscribe",
+      "sns:Get*",
+      "sns:List*"
+    ]
+    resources = ["*"]
+  }
+}
+
 resource "aws_ecs_service" "game" {
   name            = "Lambdacraft-ECS-Service"
   cluster         = aws_ecs_cluster.game.id
   task_definition = aws_ecs_task_definition.game.arn
   desired_count   = 0
+  iam_role = aws_iam_role.game_service.arn
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.game.name
