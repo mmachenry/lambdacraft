@@ -124,8 +124,8 @@ resource "aws_ecs_task_definition" "game" {
   task_role_arn            = aws_iam_role.game_task.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   network_mode             = "awsvpc"
-  cpu                      = "4096"
-  memory                   = "30720"
+  cpu                      = "2048"
+  memory                   = "6144"
   requires_compatibilities = ["EC2"]
   container_definitions = jsonencode([
     {
