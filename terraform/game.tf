@@ -34,7 +34,7 @@ resource "aws_autoscaling_group" "game" {
 }
 
 resource "aws_ecs_capacity_provider" "game" {
-  name = "Lambdacraft game cluster capacity provider"
+  name = "Lambdacraft-Game-Cluster-Capacity-Provider"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.game.arn
