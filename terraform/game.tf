@@ -31,6 +31,14 @@ resource "aws_autoscaling_group" "game" {
   launch_template {
     id = aws_launch_template.game.id
   }
+
+  # This is automatically added by the ECS capacity provider, so we need to
+  # include it here to prevent a false diff.
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = true
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_ecs_capacity_provider" "game" {
@@ -38,6 +46,7 @@ resource "aws_ecs_capacity_provider" "game" {
 
   auto_scaling_group_provider {
     auto_scaling_group_arn = aws_autoscaling_group.game.arn
+    managed_termination_protection = "ENABLED"
 
     managed_scaling {
       status = "ENABLED"
@@ -53,7 +62,7 @@ resource "aws_ecs_service" "game" {
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.game.arn
-    weight            = 100
+    weight            = 1
   }
 
   network_configuration {
