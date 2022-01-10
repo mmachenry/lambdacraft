@@ -46,7 +46,7 @@ resource "aws_ecs_capacity_provider" "game" {
 }
 
 resource "aws_ecs_service" "game" {
-  name            = "Lambdacraft ECS Service"
+  name            = "Lambdacraft-ECS-Service"
   cluster         = aws_ecs_cluster.game.id
   task_definition = aws_ecs_task_definition.game.arn
   desired_count   = 0
@@ -59,7 +59,6 @@ resource "aws_ecs_service" "game" {
   network_configuration {
     subnets          = [ aws_subnet.subnet_a.id, aws_subnet.subnet_b.id, aws_subnet.subnet_c.id ]
     security_groups  = [aws_security_group.game.id]
-    assign_public_ip = true
   }
 }
 
