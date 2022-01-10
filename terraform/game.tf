@@ -33,6 +33,36 @@ resource "aws_autoscaling_group" "game" {
   }
 }
 
+resource "aws_ecs_capacity_provider" "game" {
+  name = "Lambdacraft game cluster capacity provider"
+
+  auto_scaling_group_provider {
+    auto_scaling_group_arn = aws_autoscaling_group.game.arn
+
+    managed_scaling {
+      status = "ENABLED"
+    }
+  }
+}
+
+resource "aws_ecs_service" "game" {
+  name            = "Lambdacraft ECS Service"
+  cluster         = aws_ecs_cluster.game.id
+  task_definition = aws_ecs_task_definition.game.arn
+  desired_count   = 0
+
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.game.arn
+    weight            = 100
+  }
+
+  network_configuration {
+    subnets          = [ aws_subnet.subnet_a.id, aws_subnet.subnet_b.id, aws_subnet.subnet_c.id ]
+    security_groups  = [aws_security_group.game.id]
+    assign_public_ip = true
+  }
+}
+
 resource "aws_ecr_repository" "game" {
   name = "game-repository"
 }
