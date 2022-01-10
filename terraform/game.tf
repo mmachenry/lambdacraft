@@ -67,7 +67,8 @@ resource "aws_ecr_repository" "game" {
 }
 
 resource "aws_ecs_cluster" "game" {
-  name = "game-cluster"
+  name               = "game-cluster"
+  capacity_providers = [aws_ecs_capacity_provider.game.name]
 }
 
 resource "aws_iam_role" "game_task" {
