@@ -81,7 +81,7 @@ resource "aws_lambda_function" "startup" {
     variables = {
       CLUSTER_ARN       = aws_ecs_cluster.game.arn,
       TASK_ARN          = aws_ecs_task_definition.game.arn,
-      SUBNET_IDS        = "${aws_subnet.subnet_a.id},${aws_subnet.subnet_b.id},${aws_subnet.subnet_c.id}"
+      SUBNET_IDS        = "${aws_subnet.subnet_a.id},${aws_subnet.subnet_b.id}"
       SECURITY_GROUP_ID = aws_security_group.game.id,
     }
   }

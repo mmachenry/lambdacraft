@@ -4,7 +4,7 @@ data "aws_ami" "amazn2" {
 
   filter {
     name   = "manifest-location"
-    values = ["amazon/amzn2-ami-kernel-5.10-hvm-*"]
+    values = ["amazon/amzn2-ami-ecs-*"]
   }
 
   filter {
@@ -19,10 +19,17 @@ resource "aws_launch_template" "game" {
   instance_type          = var.game_vm_type
   vpc_security_group_ids = [aws_security_group.game.id]
   ebs_optimized          = true
+  # TODO: Don't hard-code this, or at least ensure it's been created.
+  iam_instance_profile {
+    name = "ecsInstanceRole"
+  }
+  # ECS requires this because ECS be crazy.
+  user_data = base64encode("#!/bin/bash\necho ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config;")
 }
 
 resource "aws_autoscaling_group" "game" {
-  name                = "game"
+  name = "game"
+  # So long as this subnet is hardcoded, we gain no benefit from multiple AZs.
   vpc_zone_identifier = [aws_subnet.subnet_a.id]
 
   desired_capacity = 0
@@ -31,7 +38,7 @@ resource "aws_autoscaling_group" "game" {
 
   launch_template {
     id      = aws_launch_template.game.id
-    version = "$Default"
+    version = aws_launch_template.game.latest_version
   }
 
   # This is automatically added by the ECS capacity provider, so we need to
@@ -51,7 +58,10 @@ resource "aws_ecs_capacity_provider" "game" {
     managed_termination_protection = "ENABLED"
 
     managed_scaling {
-      status = "ENABLED"
+      status                    = "ENABLED"
+      minimum_scaling_step_size = 1
+      maximum_scaling_step_size = 1
+      target_capacity           = 100
     }
   }
 }
@@ -94,13 +104,8 @@ resource "aws_ecs_service" "game" {
   desired_count   = 0
   iam_role = aws_iam_role.game_service.arn
 
-  capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.game.name
-    weight            = 1
-  }
-
   network_configuration {
-    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id, aws_subnet.subnet_c.id]
+    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
     security_groups = [aws_security_group.game.id]
   }
 }
@@ -110,8 +115,12 @@ resource "aws_ecr_repository" "game" {
 }
 
 resource "aws_ecs_cluster" "game" {
-  name               = "game-cluster"
+  name               = var.ecs_cluster_name
   capacity_providers = [aws_ecs_capacity_provider.game.name]
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.game.name
+    weight            = 100
+  }
 }
 
 resource "aws_iam_role" "game_task" {
@@ -150,6 +159,15 @@ resource "aws_security_group" "game" {
     description = "Minecraft protocol standard port"
     from_port   = 25565
     to_port     = 25565
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # TODO: Delete this when no longer debugging this instance.
+  ingress {
+    description = "Minecraft protocol standard port"
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

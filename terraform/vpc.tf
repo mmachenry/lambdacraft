@@ -2,22 +2,21 @@ resource "aws_vpc" "main" {
   cidr_block = "172.31.0.0/16"
 }
 
+# Not sure if we need multiple subnets, as we only ever run at most two VMs
+# that should be colocated. However, having two might mean if one zone goes
+# down things could migrate to the other AZ (if appropriately configured.)
 resource "aws_subnet" "subnet_a" {
-  vpc_id            = aws_vpc.main.id
-  availability_zone = "${var.aws_region}a"
-  cidr_block        = "172.31.0.0/20"
+  vpc_id                  = aws_vpc.main.id
+  availability_zone       = "${var.aws_region}a"
+  cidr_block              = "172.31.0.0/20"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "subnet_b" {
-  vpc_id            = aws_vpc.main.id
-  availability_zone = "${var.aws_region}b"
-  cidr_block        = "172.31.16.0/20"
-}
-
-resource "aws_subnet" "subnet_c" {
-  vpc_id            = aws_vpc.main.id
-  availability_zone = "${var.aws_region}c"
-  cidr_block        = "172.31.32.0/20"
+  vpc_id                  = aws_vpc.main.id
+  availability_zone       = "${var.aws_region}b"
+  cidr_block              = "172.31.16.0/20"
+  map_public_ip_on_launch = true
 }
 
 resource "aws_internet_gateway" "main" {
@@ -36,7 +35,6 @@ locals {
   subnets = [
     aws_subnet.subnet_a.id,
     aws_subnet.subnet_b.id,
-    aws_subnet.subnet_c.id
   ]
 }
 

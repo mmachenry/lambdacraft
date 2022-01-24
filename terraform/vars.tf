@@ -15,3 +15,9 @@ variable "game_vm_type" {
   default     = "t4g.large"
   type        = string
 }
+
+variable "ecs_cluster_name" {
+  description = "Name of the AWS ECS cluster. Separated to break a cycle."
+  default     = "game-cluster"
+  type        = string
+}
