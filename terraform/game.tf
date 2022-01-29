@@ -66,14 +66,13 @@ resource "aws_ecs_capacity_provider" "game" {
   }
 }
 
-resource "aws_iam_role" "game_service" {
-  name               = "lambdacraft-game-service-role"
-  assume_role_policy = data.aws_iam_policy_document.game_service.json
+resource "aws_iam_policy" "game_task" {
+  name   = "lambdacraft-game-service-policy"
+  policy = data.aws_iam_policy_document.actions.json
 }
 
-data "aws_iam_policy_document" "game_service" {
+data "aws_iam_policy_document" "actions" {
   statement {
-    effect = "Allow"
     actions = [
       "application-autoscaling:*",
       "ecs:DescribeServices",
@@ -102,7 +101,7 @@ resource "aws_ecs_service" "game" {
   cluster         = aws_ecs_cluster.game.id
   task_definition = aws_ecs_task_definition.game.arn
   desired_count   = 0
-  iam_role = aws_iam_role.game_service.arn
+  iam_role        = aws_iam_role.game_task.arn
 
   network_configuration {
     subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
@@ -124,11 +123,11 @@ resource "aws_ecs_cluster" "game" {
 }
 
 resource "aws_iam_role" "game_task" {
-  name               = "game-task-role"
-  assume_role_policy = data.aws_iam_policy_document.game_task.json
+  name               = "gameTaskRole"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-data "aws_iam_policy_document" "game_task" {
+data "aws_iam_policy_document" "assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -139,10 +138,8 @@ data "aws_iam_policy_document" "game_task" {
 }
 
 resource "aws_iam_role_policy_attachment" "game_task" {
-  for_each = toset([
-  ])
   role       = aws_iam_role.game_task.name
-  policy_arn = each.value
+  policy_arn = aws_iam_policy.game_task.arn
 }
 
 resource "aws_cloudwatch_log_group" "game" {
