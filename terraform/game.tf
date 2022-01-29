@@ -101,7 +101,6 @@ resource "aws_ecs_service" "game" {
   cluster         = aws_ecs_cluster.game.id
   task_definition = aws_ecs_task_definition.game.arn
   desired_count   = 0
-  iam_role        = aws_iam_role.game_task.arn
 
   network_configuration {
     subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
