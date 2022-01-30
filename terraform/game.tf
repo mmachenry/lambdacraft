@@ -101,6 +101,15 @@ resource "aws_ecs_service" "game" {
   cluster         = aws_ecs_cluster.game.id
   task_definition = aws_ecs_task_definition.game.arn
   desired_count   = 0
+  # Allow the service to kill the running instance if the config is updated.
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent = 100
+
+  # Needed to avoid false diffs
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.game.name
+    weight            = 100
+  }
 
   network_configuration {
     subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
@@ -115,10 +124,6 @@ resource "aws_ecr_repository" "game" {
 resource "aws_ecs_cluster" "game" {
   name               = var.ecs_cluster_name
   capacity_providers = [aws_ecs_capacity_provider.game.name]
-  default_capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.game.name
-    weight            = 100
-  }
 }
 
 resource "aws_iam_role" "game_task" {
