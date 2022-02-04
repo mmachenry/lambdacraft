@@ -9,7 +9,7 @@ data "aws_ami" "amazn2" {
 
   filter {
     name   = "architecture"
-    values = ["arm64"] # TODO: Determine this by EC2 machine type.
+    values = ["x86_64"] # TODO: Determine this by EC2 machine type.
   }
 }
 
@@ -110,11 +110,6 @@ resource "aws_ecs_service" "game" {
     capacity_provider = aws_ecs_capacity_provider.game.name
     weight            = 100
   }
-
-  network_configuration {
-    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-    security_groups = [aws_security_group.game.id]
-  }
 }
 
 resource "aws_ecr_repository" "game" {
@@ -185,7 +180,7 @@ resource "aws_ecs_task_definition" "game" {
   family                   = "game"
   task_role_arn            = aws_iam_role.game_task.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  network_mode             = "awsvpc"
+  network_mode             = "bridge"
   cpu                      = "1024"
   memory                   = "4096"
   requires_compatibilities = ["EC2"]
