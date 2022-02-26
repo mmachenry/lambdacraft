@@ -1,116 +1,9 @@
-data "aws_ami" "amazn2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "manifest-location"
-    values = ["amazon/amzn2-ami-ecs-*"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"] # TODO: Determine this by EC2 machine type.
-  }
-}
-
-resource "aws_launch_template" "game" {
-  name_prefix            = "game_"
-  image_id               = data.aws_ami.amazn2.id
-  instance_type          = var.game_vm_type
-  vpc_security_group_ids = [aws_security_group.game.id]
-  ebs_optimized          = true
-  # TODO: Don't hard-code this, or at least ensure it's been created.
-  iam_instance_profile {
-    name = "ecsInstanceRole"
-  }
-  # TODO: Remove this when I no longer need SSH access to the ECS VMs.
-  key_name = "ecs-debug"
-  # ECS requires this because ECS be crazy.
-  user_data = base64encode("#!/bin/bash\necho ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config;")
-}
-
-resource "aws_autoscaling_group" "game" {
-  name = "game"
-  # So long as this subnet is hardcoded, we gain no benefit from multiple AZs.
-  vpc_zone_identifier   = [aws_subnet.subnet_a.id]
-  protect_from_scale_in = true
-
-  desired_capacity = 0
-  min_size         = 0
-  max_size         = 1
-
-  launch_template {
-    id      = aws_launch_template.game.id
-    version = aws_launch_template.game.latest_version
-  }
-
-  # This is automatically added by the ECS capacity provider, so we need to
-  # include it here to prevent a false diff.
-  tag {
-    key                 = "AmazonECSManaged"
-    value               = true
-    propagate_at_launch = true
-  }
-}
-
-resource "aws_ecs_capacity_provider" "game" {
-  name = "Lambdacraft-Game-Cluster-Capacity-Provider"
-
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.game.arn
-    managed_termination_protection = "ENABLED"
-
-    managed_scaling {
-      status                    = "ENABLED"
-      minimum_scaling_step_size = 1
-      maximum_scaling_step_size = 1
-      target_capacity           = 100
-    }
-  }
-}
-
-resource "aws_iam_policy" "game_task" {
-  name   = "lambdacraft-game-service-policy"
-  policy = data.aws_iam_policy_document.actions.json
-}
-
-data "aws_iam_policy_document" "actions" {
-  statement {
-    actions = [
-      "application-autoscaling:*",
-      "ecs:DescribeServices",
-      "ecs:UpdateService",
-      "cloudwatch:DescribeAlarms",
-      "cloudwatch:PutMetricAlarm",
-      "cloudwatch:DeleteAlarms",
-      "cloudwatch:DescribeAlarmHistory",
-      "cloudwatch:DescribeAlarmsForMetric",
-      "cloudwatch:GetMetricStatistics",
-      "cloudwatch:ListMetrics",
-      "cloudwatch:DisableAlarmActions",
-      "cloudwatch:EnableAlarmActions",
-      "iam:CreateServiceLinkedRole",
-      "sns:CreateTopic",
-      "sns:Subscribe",
-      "sns:Get*",
-      "sns:List*"
-    ]
-    resources = ["*"]
-  }
-}
-
 resource "aws_ecr_repository" "game" {
   name = "game-repository"
 }
 
 resource "aws_ecs_cluster" "game" {
-  name               = var.ecs_cluster_name
-  capacity_providers = [aws_ecs_capacity_provider.game.name]
-
-  default_capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.game.name
-    weight            = 100
-  }
+  name = var.ecs_cluster_name
 }
 
 resource "aws_iam_role" "game_task" {
@@ -126,11 +19,6 @@ data "aws_iam_policy_document" "assume_role" {
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
-}
-
-resource "aws_iam_role_policy_attachment" "game_task" {
-  role       = aws_iam_role.game_task.name
-  policy_arn = aws_iam_policy.game_task.arn
 }
 
 resource "aws_cloudwatch_log_group" "game" {
@@ -151,11 +39,10 @@ resource "aws_security_group" "game" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # TODO: Delete this when no longer debugging this instance.
   ingress {
-    description = "Minecraft protocol standard port"
-    from_port   = 22
-    to_port     = 22
+    description = "Minecraft RCON standard port"
+    from_port   = 25575
+    to_port     = 25575
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -172,18 +59,40 @@ resource "aws_efs_file_system" "world" {
 }
 
 resource "aws_efs_mount_target" "world" {
-  file_system_id = aws_efs_file_system.world.id
-  subnet_id      = aws_subnet.subnet_a.id
+  file_system_id  = aws_efs_file_system.world.id
+  subnet_id       = aws_subnet.subnet_a.id
+  security_groups = [aws_security_group.world_efs.id]
+}
+
+resource "aws_security_group" "world_efs" {
+  name = "Lambdacraft NSF world mount security group"
+  description = "Allow NFS port ingress"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "NFS protocol ingress"
+    from_port = 2049
+    to_port = 2049
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_ecs_task_definition" "game" {
   family                   = "game"
   task_role_arn            = aws_iam_role.game_task.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  network_mode             = "host"
-  cpu                      = "1024"
-  memory                   = "4096"
-  requires_compatibilities = ["EC2"]
+  network_mode             = "awsvpc"
+  cpu                      = "2048"
+  memory                   = "8192"
+  requires_compatibilities = ["FARGATE"]
   # Avoiding a false diff
   tags = {}
   container_definitions = jsonencode([
