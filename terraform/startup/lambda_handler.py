@@ -7,7 +7,7 @@ def handler (event, callback):
     response = client.run_task(
         cluster = os.getenv("CLUSTER_ARN"),
         taskDefinition = os.getenv("TASK_ARN"),
-        launchType = "FARGATE",
+        launchType = "EC2",
         count = 1,
         networkConfiguration = {
             "awsvpcConfiguration": {
@@ -17,3 +17,4 @@ def handler (event, callback):
             },
         },
     )
+    print(response)
