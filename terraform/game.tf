@@ -168,6 +168,14 @@ resource "aws_security_group" "game" {
   }
 }
 
+resource "aws_efs_file_system" "world" {
+}
+
+resource "aws_efs_mount_target" "world" {
+  file_system_id = aws_efs_file_system.world.id
+  subnet_id      = aws_subnet.subnet_a.id
+}
+
 resource "aws_ecs_task_definition" "game" {
   family                   = "game"
   task_role_arn            = aws_iam_role.game_task.arn
@@ -192,6 +200,19 @@ resource "aws_ecs_task_definition" "game" {
       }
       cpu       = 0
       essential = true
+      mountPoints = [
+        {
+          containerPath = "/data",
+          sourceVolume = "world"
+        }
+      ],
     }
   ])
+  volume {
+    name = "world"
+    efs_volume_configuration {
+      file_system_id = aws_efs_file_system.world.id
+      root_directory = "/"
+    }
+  }
 }
