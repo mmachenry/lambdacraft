@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "startup_lambda_assume_role" {
 }
 
 resource "aws_iam_role" "startup_lambda" {
-  name               = "report_lambda_role"
+  name               = "startup_lambda_role"
   assume_role_policy = data.aws_iam_policy_document.startup_lambda_assume_role.json
 }
 
@@ -25,14 +25,9 @@ data "aws_iam_policy_document" "startup_lambda" {
     actions = [
       "logs:CreateLogStream",
       "logs:CreateLogGroup",
+      "logs:PutLogEvents",
     ]
-    resources = [aws_cloudwatch_log_group.startup_lambda.arn]
-  }
-
-  statement {
-    effect    = "Allow"
-    actions   = ["logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.startup_lambda.arn}:*"]
+    resources = ["arn:aws:logs:*:*:*"]
   }
 
   statement {
