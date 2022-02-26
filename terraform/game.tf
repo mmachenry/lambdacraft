@@ -172,7 +172,7 @@ resource "aws_ecs_task_definition" "game" {
   family                   = "game"
   task_role_arn            = aws_iam_role.game_task.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  network_mode             = "bridge"
+  network_mode             = "host"
   cpu                      = "1024"
   memory                   = "4096"
   requires_compatibilities = ["EC2"]
