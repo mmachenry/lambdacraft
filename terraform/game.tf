@@ -30,7 +30,8 @@ resource "aws_launch_template" "game" {
 resource "aws_autoscaling_group" "game" {
   name = "game"
   # So long as this subnet is hardcoded, we gain no benefit from multiple AZs.
-  vpc_zone_identifier = [aws_subnet.subnet_a.id]
+  vpc_zone_identifier   = [aws_subnet.subnet_a.id]
+  protect_from_scale_in = true
 
   desired_capacity = 0
   min_size         = 0
@@ -103,7 +104,7 @@ resource "aws_ecs_service" "game" {
   desired_count   = 0
   # Allow the service to kill the running instance if the config is updated.
   deployment_minimum_healthy_percent = 0
-  deployment_maximum_percent = 100
+  deployment_maximum_percent         = 100
 
   # Needed to avoid false diffs
   capacity_provider_strategy {
@@ -177,13 +178,16 @@ resource "aws_security_group" "game" {
 }
 
 resource "aws_ecs_task_definition" "game" {
-  family                   = "game"
-  task_role_arn            = aws_iam_role.game_task.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  family             = "game"
+  task_role_arn      = aws_iam_role.game_task.arn
+  execution_role_arn = aws_iam_role.ecs_task_execution.arn
+  # TODO: It would be nice to use "awsvpc" here, but this is simpler.
   network_mode             = "bridge"
   cpu                      = "1024"
   memory                   = "4096"
   requires_compatibilities = ["EC2"]
+  # Avoiding a false diff
+  tags = {}
   container_definitions = jsonencode([
     {
       name  = "game-container"
