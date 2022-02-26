@@ -30,7 +30,8 @@ resource "aws_launch_template" "game" {
 resource "aws_autoscaling_group" "game" {
   name = "game"
   # So long as this subnet is hardcoded, we gain no benefit from multiple AZs.
-  vpc_zone_identifier = [aws_subnet.subnet_a.id]
+  vpc_zone_identifier   = [aws_subnet.subnet_a.id]
+  protect_from_scale_in = true
 
   desired_capacity = 0
   min_size         = 0
