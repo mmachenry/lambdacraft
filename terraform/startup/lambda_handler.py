@@ -9,12 +9,5 @@ def handler (event, callback):
         taskDefinition = os.getenv("TASK_ARN"),
         launchType = "EC2",
         count = 1,
-        networkConfiguration = {
-            "awsvpcConfiguration": {
-                "subnets": os.getenv("SUBNET_IDS", "").split(","),
-                "securityGroups": [os.getenv("SECURITY_GROUP_ID")],
-                "assignPublicIp": "ENABLED",
-            },
-        },
     )
     print(response)
