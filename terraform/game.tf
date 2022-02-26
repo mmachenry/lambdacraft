@@ -23,6 +23,8 @@ resource "aws_launch_template" "game" {
   iam_instance_profile {
     name = "ecsInstanceRole"
   }
+  # TODO: Remove this when I no longer need SSH access to the ECS VMs.
+  key_name = "ecs-debug"
   # ECS requires this because ECS be crazy.
   user_data = base64encode("#!/bin/bash\necho ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config;")
 }
@@ -167,11 +169,10 @@ resource "aws_security_group" "game" {
 }
 
 resource "aws_ecs_task_definition" "game" {
-  family             = "game"
-  task_role_arn      = aws_iam_role.game_task.arn
-  execution_role_arn = aws_iam_role.ecs_task_execution.arn
-  # TODO: It would be nice to use "awsvpc" here, but this is simpler.
-  network_mode             = "bridge"
+  family                   = "game"
+  task_role_arn            = aws_iam_role.game_task.arn
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  network_mode             = "awsvpc"
   cpu                      = "1024"
   memory                   = "4096"
   requires_compatibilities = ["EC2"]
