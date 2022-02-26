@@ -103,7 +103,7 @@ resource "aws_ecs_service" "game" {
   desired_count   = 0
   # Allow the service to kill the running instance if the config is updated.
   deployment_minimum_healthy_percent = 0
-  deployment_maximum_percent = 100
+  deployment_maximum_percent         = 100
 
   # Needed to avoid false diffs
   capacity_provider_strategy {
@@ -177,13 +177,16 @@ resource "aws_security_group" "game" {
 }
 
 resource "aws_ecs_task_definition" "game" {
-  family                   = "game"
-  task_role_arn            = aws_iam_role.game_task.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  family             = "game"
+  task_role_arn      = aws_iam_role.game_task.arn
+  execution_role_arn = aws_iam_role.ecs_task_execution.arn
+  # TODO: It would be nice to use "awsvpc" here, but this is simpler.
   network_mode             = "bridge"
   cpu                      = "1024"
   memory                   = "4096"
   requires_compatibilities = ["EC2"]
+  # Avoiding a false diff
+  tags = {}
   container_definitions = jsonencode([
     {
       name  = "game-container"
