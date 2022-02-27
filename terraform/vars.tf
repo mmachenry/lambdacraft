@@ -22,3 +22,9 @@ variable "ecs_cluster_name" {
   default     = "game-cluster"
   type        = string
 }
+
+variable "rcon_password" {
+  description = "The password to login to admin the server with RCON."
+  default     = "Lambdacraft"
+  type        = string
+}

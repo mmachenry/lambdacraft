@@ -227,6 +227,16 @@ resource "aws_ecs_task_definition" "game" {
           sourceVolume = "world"
         }
       ],
+      environment = [
+        {
+          name = "ENABLE_RCON",
+          value = "true"
+        },
+        {
+          name = "RCON_PASSWORD",
+          value = var.rcon_password
+        },
+      ],
     }
   ])
   volume {

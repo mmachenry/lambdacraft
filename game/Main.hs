@@ -3,6 +3,7 @@ import Control.Concurrent (threadDelay)
 import Control.Monad (void)
 import Data.List (isPrefixOf)
 import System.Posix.Daemonize (daemonize)
+import System.Environment (getEnv)
 
 main :: IO ()
 main = daemonize $ stopInactiveServer 0
@@ -10,9 +11,10 @@ main = daemonize $ stopInactiveServer 0
 -- A wrapper around readProcess to call the rcon-cli script with given args.
 rcon :: [String] -> IO String
 rcon cmds = do
+    password <- getEnv "RCON_PASSWORD"
     (_, stdout, _) <- readProcessWithExitCode
         "/usr/local/bin/rcon-cli"
-        (["--password", "LambdaCraft"] ++ cmds) ""
+        (["--password", password] ++ cmds) ""
     return stdout
 
 -- Infinitely loops to check server activity. Upon multi loops with no activity
