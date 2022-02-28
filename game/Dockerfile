@@ -11,6 +11,6 @@ COPY start_monitor_and_server /
 RUN chmod a+x /start_monitor_and_server
 ENV EULA TRUE
 ENV TYPE FABRIC
-ENV MEMORY 4G
+ENV MEMORY 6G
 ENV VERSION 1.17
 ENTRYPOINT ["/start_monitor_and_server"]
