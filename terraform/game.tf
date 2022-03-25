@@ -202,6 +202,7 @@ resource "aws_ecs_task_definition" "game" {
   task_role_arn            = aws_iam_role.game_task.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   network_mode             = "host"
+  # TODO: Set this dynamically based on the VM type.
   cpu                      = "1792"
   memory                   = "7168"
   requires_compatibilities = ["EC2"]

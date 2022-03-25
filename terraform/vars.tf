@@ -28,3 +28,15 @@ variable "rcon_password" {
   default     = "Lambdacraft"
   type        = string
 }
+
+variable "hostname" {
+  description = "Hostname players use to connect to the server."
+  default = "heckbringer.com"
+  type = string
+}
+
+variable "hosted_zone_id" {
+  description = "Hosted zone within which to maintain DNS records for the server."
+  default = "ZOQDXS6QXD97N"
+  type = string
+}
