@@ -1,9 +1,14 @@
 import boto3
 
 def lambda_handler(event, context):
+    print(event)
+    print(context)
+
     ec2 = boto3.resource('ec2')
     instance = ec2.Instance(event['detail']['instance-id'])
     new_ip = instance.public_ip_address
+
+    print(new_ip)
 
     client = boto3.client("route53")
     # TODO: Pull these from env variables.
@@ -31,3 +36,7 @@ def lambda_handler(event, context):
             ]
         }
     )
+
+    return {
+        'statusCode': 200,
+    }

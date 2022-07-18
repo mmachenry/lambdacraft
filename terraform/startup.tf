@@ -128,7 +128,7 @@ resource "aws_iam_policy" "dns_lambda" {
 
 resource "aws_iam_role_policy_attachment" "dns_lambda" {
   role       = aws_iam_role.game_task.name
-  policy_arn = aws_iam_policy.dns.arn
+  policy_arn = aws_iam_policy.dns_lambda.arn
 }
 
 data "archive_file" "dns_lambda" {
