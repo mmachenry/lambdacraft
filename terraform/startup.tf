@@ -148,7 +148,7 @@ resource "aws_lambda_function" "dns_lambda" {
   environment {
     variables = {
       hosted_zone_id = var.hosted_zone_id,
-      hostname = var.hostname,
+      hostname       = var.hostname,
     }
   }
 }

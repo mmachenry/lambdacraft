@@ -171,20 +171,20 @@ resource "aws_efs_file_system" "world" {
 }
 
 resource "aws_efs_mount_target" "world" {
-  file_system_id = aws_efs_file_system.world.id
-  subnet_id      = aws_subnet.subnet_a.id
+  file_system_id  = aws_efs_file_system.world.id
+  subnet_id       = aws_subnet.subnet_a.id
   security_groups = [aws_security_group.world_efs.id]
 }
 
 resource "aws_security_group" "world_efs" {
-  name = "Lambdacraft NSF world mount security group"
+  name        = "Lambdacraft NSF world mount security group"
   description = "Allow NFS port ingress"
-  vpc_id = aws_vpc.main.id
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description = "NFS protocol ingress"
-    from_port = 2049
-    to_port = 2049
+    from_port   = 2049
+    to_port     = 2049
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -198,10 +198,10 @@ resource "aws_security_group" "world_efs" {
 }
 
 resource "aws_ecs_task_definition" "game" {
-  family                   = "game"
-  task_role_arn            = aws_iam_role.game_task.arn
-  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
-  network_mode             = "host"
+  family             = "game"
+  task_role_arn      = aws_iam_role.game_task.arn
+  execution_role_arn = aws_iam_role.ecs_task_execution.arn
+  network_mode       = "host"
   # TODO: Set this dynamically based on the VM type.
   cpu                      = "1792"
   memory                   = "7168"
@@ -225,16 +225,16 @@ resource "aws_ecs_task_definition" "game" {
       mountPoints = [
         {
           containerPath = "/data",
-          sourceVolume = "world"
+          sourceVolume  = "world"
         }
       ],
       environment = [
         {
-          name = "ENABLE_RCON",
+          name  = "ENABLE_RCON",
           value = "true"
         },
         {
-          name = "RCON_PASSWORD",
+          name  = "RCON_PASSWORD",
           value = var.rcon_password
         },
       ],
