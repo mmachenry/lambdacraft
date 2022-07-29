@@ -2,6 +2,13 @@ import os
 import json
 import boto3
 
+class DatetimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        try:
+            return super().default(obj)
+        except TypeError:
+            return str(obj)
+
 def handler (event, callback):
     cluster_arn = os.getenv("CLUSTER_ARN")
     client = boto3.client("ecs")
@@ -37,7 +44,7 @@ def handler (event, callback):
         "body": json.dumps({
             "tasks": tasks_response,
             "containers": containers_response,
-        })
+        }, cls=DatetimeEncoder)
     }
 
 if __name__ == "__main__":
