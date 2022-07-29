@@ -53,8 +53,8 @@ resource "aws_iam_role_policy_attachment" "dns_lambda" {
 
 data "archive_file" "dns_lambda" {
   type        = "zip"
-  source_file = "${path.module}/startup/update_dns.py"
-  output_path = "${path.module}/startup/update_dns.zip"
+  source_file = "${path.module}/lambdas/update_dns.py"
+  output_path = "${path.module}/lambdas/update_dns.zip"
 }
 
 resource "aws_lambda_function" "dns_lambda" {

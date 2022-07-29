@@ -58,8 +58,8 @@ resource "aws_iam_role_policy" "startup_lambda" {
 
 data "archive_file" "startup_lambda" {
   type        = "zip"
-  source_file = "${path.module}/startup/lambda_handler.py"
-  output_path = "${path.module}/startup/lambda_handler.zip"
+  source_file = "${path.module}/lambdas/lambda_handler.py"
+  output_path = "${path.module}/lambdas/lambda_handler.zip"
 }
 
 resource "aws_lambda_function" "startup" {
