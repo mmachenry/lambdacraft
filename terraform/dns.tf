@@ -35,7 +35,6 @@ data "aws_iam_policy_document" "dns_lambda" {
     actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      # "logs:CreateLogGroup"
     ]
     resources = ["arn:aws:logs:*:*:*"]
   }
@@ -47,7 +46,7 @@ resource "aws_iam_policy" "dns_lambda" {
 }
 
 resource "aws_iam_role_policy_attachment" "dns_lambda" {
-  role       = aws_iam_role.game_task.name
+  role       = aws_iam_role.dns_lambda.name
   policy_arn = aws_iam_policy.dns_lambda.arn
 }
 
