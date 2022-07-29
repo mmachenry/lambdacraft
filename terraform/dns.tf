@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "dns_lambda" {
 
 resource "aws_iam_policy" "dns_lambda" {
   name   = "lambdacraft-dns-update-policy"
-  policy = data.aws_iam_policy_document.actions.json
+  policy = data.aws_iam_policy_document.dns_lambda.json
 }
 
 resource "aws_iam_role_policy_attachment" "dns_lambda" {
