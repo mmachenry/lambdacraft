@@ -4,24 +4,30 @@ import boto3
 
 def handler (event, callback):
     cluster_arn = os.getenv("CLUSTER_ARN")
-    task_arn = os.getenv("TASK_ARN")
-
     client = boto3.client("ecs")
-    print(task_arn)
-    tasks_response = client.describe_tasks(
-        cluster = cluster_arn,
-        tasks = [task_arn],
+
+    list_tasks_response = client.list_tasks(
+        cluster = cluster_arn
     )
+
+    tasks_response = {}
+    if len(list_tasks_response["taskArns"]) > 0:
+        tasks_response = client.describe_tasks(
+            cluster = cluster_arn,
+            tasks = list_tasks_response["taskArns"]
+        )
 
     list_containers_response = client.list_container_instances(
         cluster = cluster_arn,
     )
 
-    containers_response = client.describe_container_instances(
-        cluster = cluster_arn,
-        containerInstances =
-          list_containers_response['containerInstanceArns'],
-    )
+    containers_response = {}
+    if len(list_containers_response['containerInstanceArns']) > 0:
+        containers_response = client.describe_container_instances(
+            cluster = cluster_arn,
+            containerInstances =
+              list_containers_response['containerInstanceArns'],
+        )
 
     return {
         "statusCode": 200,
