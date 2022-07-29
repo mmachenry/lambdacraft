@@ -11,9 +11,8 @@ def handler(event, context):
     print(new_ip)
 
     client = boto3.client("route53")
-    # TODO: Pull these from env variables.
-    hosted_zone_id = "ZOQDXS6QXD97N" # os.genenv("hosted_zone_id")
-    hostname = "heckbringer.com" # os.getenv("HOSTNAME")
+    hosted_zone_id = os.genenv("HOSTED_ZONE_ID")
+    hostname = os.getenv("HOSTNAME")
 
     response = client.change_resource_record_sets(
         HostedZoneId=hosted_zone_id,

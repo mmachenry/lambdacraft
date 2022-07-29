@@ -67,8 +67,8 @@ resource "aws_lambda_function" "dns_lambda" {
   role             = aws_iam_role.dns_lambda.arn
   environment {
     variables = {
-      hosted_zone_id = var.hosted_zone_id,
-      hostname       = var.hostname,
+      HOSTED_ZONE_ID = var.hosted_zone_id,
+      HOSTNAME       = var.hostname,
     }
   }
 }
