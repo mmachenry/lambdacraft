@@ -10,3 +10,7 @@ output "base_url" {
 output "game_cluster_arn" {
   value = aws_ecs_cluster.game.arn
 }
+
+output "game_task_definition_arn" {
+  value = aws_ecs_task_definition.game.arn
+}
