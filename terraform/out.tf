@@ -6,3 +6,7 @@ output "base_url" {
   description = "Base URL for API Gateway."
   value       = aws_apigatewayv2_stage.prod.invoke_url
 }
+
+output "game_cluster_arn" {
+  value = aws_ecs_cluster.game.arn
+}
