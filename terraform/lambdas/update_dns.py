@@ -1,4 +1,5 @@
 import boto3
+import os
 
 def handler(event, context):
     print(event)
@@ -11,7 +12,7 @@ def handler(event, context):
     print(new_ip)
 
     client = boto3.client("route53")
-    hosted_zone_id = os.genenv("HOSTED_ZONE_ID")
+    hosted_zone_id = os.getenv("HOSTED_ZONE_ID")
     hostname = os.getenv("HOSTNAME")
 
     response = client.change_resource_record_sets(

@@ -50,6 +50,14 @@ resource "aws_iam_role_policy_attachment" "dns_lambda" {
   policy_arn = aws_iam_policy.dns_lambda.arn
 }
 
+resource "aws_lambda_permission" "dns_lambda" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.dns_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.vm_started.arn
+}
+
 data "archive_file" "dns_lambda" {
   type        = "zip"
   source_file = "${path.module}/lambdas/update_dns.py"
@@ -77,7 +85,7 @@ resource "aws_cloudwatch_event_rule" "vm_started" {
   description = "Fires when the Minecraft server VM starts."
 
   event_pattern = jsonencode({
-    source = ["aws.ec2"],
+    source      = ["aws.ec2"],
     detail-type = ["EC2 Instance State-change Notification"],
     detail = {
       state = ["pending"],
