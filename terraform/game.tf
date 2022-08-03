@@ -216,8 +216,8 @@ resource "aws_ecs_task_definition" "game" {
   execution_role_arn = aws_iam_role.ecs_task_execution.arn
   network_mode       = "host"
   # Reserve a little bit of capacity for the OS/other processes
-  cpu                      = data.aws_ec2_instance_type.game.default_cores * 1000 - 100
-  memory                   = data.aws_ec2_instance_type.game.memory_size - 512
+  cpu                      = data.aws_ec2_instance_type.game.default_vcpus * 1024 - 128
+  memory                   = data.aws_ec2_instance_type.game.memory_size - 1024
   requires_compatibilities = ["EC2"]
   # Avoiding a false diff
   tags = {}
