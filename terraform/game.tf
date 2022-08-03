@@ -30,8 +30,6 @@ resource "aws_launch_template" "game" {
   iam_instance_profile {
     name = "ecsInstanceRole"
   }
-  # TODO: Remove this when I no longer need SSH access to the ECS VMs.
-  key_name = "ecs-debug"
   # ECS requires this because ECS be crazy.
   user_data = base64encode("#!/bin/bash\necho ECS_CLUSTER=${var.ecs_cluster_name} >> /etc/ecs/ecs.config;")
 }
@@ -166,6 +164,14 @@ resource "aws_security_group" "game" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "ssh port"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -209,9 +215,9 @@ resource "aws_ecs_task_definition" "game" {
   task_role_arn      = aws_iam_role.game_task.arn
   execution_role_arn = aws_iam_role.ecs_task_execution.arn
   network_mode       = "host"
-  # TODO: Set this dynamically based on the VM type.
-  cpu                      = "1792"
-  memory                   = "7168"
+  # Reserve a little bit of capacity for the OS/other processes
+  cpu                      = data.aws_ec2_instance_type.game.default_cores * 1000 - 100
+  memory                   = data.aws_ec2_instance_type.game.memory_size - 512
   requires_compatibilities = ["EC2"]
   # Avoiding a false diff
   tags = {}

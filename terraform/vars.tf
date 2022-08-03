@@ -12,7 +12,7 @@ variable "log_retention" {
 
 variable "game_vm_type" {
   description = "EC2 machine type on which to run the game server."
-  default     = "r6g.medium"
+  default     = "z1d.large"
   type        = string
 }
 
