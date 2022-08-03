@@ -1,3 +1,7 @@
+data "aws_ec2_instance_type" "game" {
+  instance_type = var.game_vm_type
+}
+
 data "aws_ami" "amazn2" {
   most_recent = true
   owners      = ["amazon"]
@@ -9,7 +13,7 @@ data "aws_ami" "amazn2" {
 
   filter {
     name   = "architecture"
-    values = ["x86_64"] # TODO: Determine this by EC2 machine type.
+    values = [data.aws_ec2_instance_type.game.supported_architectures[0]]
   }
 }
 
@@ -19,6 +23,9 @@ resource "aws_launch_template" "game" {
   instance_type          = var.game_vm_type
   vpc_security_group_ids = [aws_security_group.game.id]
   ebs_optimized          = true
+  instance_market_options {
+    market_type = "spot"
+  }
   # TODO: Don't hard-code this, or at least ensure it's been created.
   iam_instance_profile {
     name = "ecsInstanceRole"

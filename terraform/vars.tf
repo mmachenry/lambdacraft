@@ -12,9 +12,8 @@ variable "log_retention" {
 
 variable "game_vm_type" {
   description = "EC2 machine type on which to run the game server."
-  # TODO: Determine if we can use the non-x86 t4g instances instead.
-  default = "t3.large"
-  type    = string
+  default     = "r6g.medium"
+  type        = string
 }
 
 variable "ecs_cluster_name" {
