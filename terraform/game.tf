@@ -183,6 +183,10 @@ resource "aws_security_group" "game" {
 resource "aws_efs_file_system" "world" {
 }
 
+resource "aws_backup_vault" "world" {
+  name = "lambdacraft_backup_vault"
+}
+
 resource "aws_efs_mount_target" "world" {
   file_system_id  = aws_efs_file_system.world.id
   subnet_id       = aws_subnet.subnet_a.id
