@@ -14,3 +14,7 @@ output "game_cluster_arn" {
 output "game_task_definition_arn" {
   value = aws_ecs_task_definition.game.arn
 }
+
+output "world_efs_arn" {
+  value = aws_efs_file_system.world.arn
+}
