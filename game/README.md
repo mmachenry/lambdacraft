@@ -8,3 +8,10 @@ will continually check for the number of users on the server using the rcon
 service. If it notices 10 minutes of continuous inactivity, that daemon issues
 a stop command through rcon, the Minecraft server gracefully shuts itself down
 and the container will complete running.
+
+Upgrading the server
+---
+In theory, upgrading to a new version of the server should be as simple as
+editing game/Dockerfile and changing the VERSION to the desired version.
+Then check in that update to github. The run make deploy on the
+game/Makefile which will upload the new container to the repository.

@@ -191,9 +191,24 @@ resource "aws_security_group" "game" {
 resource "aws_efs_file_system" "world" {
 }
 
+resource "aws_efs_backup_policy" "policy" {
+  file_system_id = aws_efs_file_system.world.id
+
+  backup_policy {
+    status = "ENABLED"
+  }
+}
+
+/*
+aws_backup_vault, aws_backup_selection, aws_backup_plan could be used
+in lieu of the above aws_efs_backup_policy for more fine grained control
+of the backup schedule and lifecycle of the backups and if they go to 
+cold storage, etc.
+
 resource "aws_backup_vault" "world" {
   name = "lambdacraft_backup_vault"
 }
+*/
 
 resource "aws_efs_mount_target" "world" {
   file_system_id  = aws_efs_file_system.world.id
