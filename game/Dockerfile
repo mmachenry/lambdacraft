@@ -12,6 +12,6 @@ RUN chmod a+x /start_monitor_and_server
 ENV EULA TRUE
 ENV TYPE FABRIC
 ENV MEMORY 6G
-ENV VERSION 1.19.3
+ENV VERSION 1.20.2
 ENV USE_AIKAR_FLAGS true
 ENTRYPOINT ["/start_monitor_and_server"]
