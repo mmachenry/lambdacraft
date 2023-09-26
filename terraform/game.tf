@@ -191,7 +191,7 @@ resource "aws_security_group" "game" {
 resource "aws_efs_file_system" "world" {
 }
 
-resource "aws_efs_backup_policy" "policy" {
+resource "aws_efs_backup_policy" "world_efs" {
   file_system_id = aws_efs_file_system.world.id
 
   backup_policy {
@@ -235,6 +235,23 @@ resource "aws_security_group" "world_efs" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_efs_file_system" "new_world" {
+}
+
+resource "aws_efs_backup_policy" "new_world_efs" {
+  file_system_id = aws_efs_file_system.new_world.id
+
+  backup_policy {
+    status = "ENABLED"
+  }
+}
+
+resource "aws_efs_mount_target" "new_world" {
+  file_system_id  = aws_efs_file_system.new_world.id
+  subnet_id       = aws_subnet.subnet_a.id
+  security_groups = [aws_security_group.world_efs.id]
 }
 
 resource "aws_ecs_task_definition" "game" {
@@ -283,7 +300,7 @@ resource "aws_ecs_task_definition" "game" {
   volume {
     name = "world"
     efs_volume_configuration {
-      file_system_id = aws_efs_file_system.world.id
+      file_system_id = aws_efs_file_system.new_world.id
       root_directory = "/"
     }
   }

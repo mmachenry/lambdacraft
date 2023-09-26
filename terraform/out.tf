@@ -18,3 +18,11 @@ output "game_task_definition_arn" {
 output "world_efs_arn" {
   value = aws_efs_file_system.world.arn
 }
+
+output "world_efs_mount_target_dns_name" {
+  value = aws_efs_mount_target.world
+}
+
+output "new_world_efs_mount_target_dns_name" {
+  value = aws_efs_mount_target.new_world
+}
