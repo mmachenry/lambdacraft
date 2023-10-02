@@ -300,7 +300,7 @@ resource "aws_ecs_task_definition" "game" {
   volume {
     name = "world"
     efs_volume_configuration {
-      file_system_id = aws_efs_file_system.new_world.id
+      file_system_id = aws_efs_file_system.world.id
       root_directory = "/"
     }
   }
