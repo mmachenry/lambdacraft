@@ -6,11 +6,12 @@ ecs = boto3.client("ecs")
 ec2 = boto3.client("ec2")
 
 def handler (event, callback):
-    tasks = ecs.list_tasks(
+    list_tasks_resp = ecs.list_tasks(
         cluster = os.getenv("CLUSTER_ARN"),
     )
+    task_arns = list_tasks_resp['taskArns']
 
-    if len(tasks['taskArns']) == 0:
+    if len(task_arns) == 0:
         response = ecs.run_task(
             cluster = os.getenv("CLUSTER_ARN"),
             taskDefinition = os.getenv("TASK_ARN"),
@@ -23,43 +24,64 @@ def handler (event, callback):
             }
         }
     else:
-        ips = get_ip()
+        info = get_info(task_arns)
         return {
             'statusCode': 200,
             'body': {
                 "message": "There's a task running so not starting.",
-                "ips": ips,
+                "info": info,
             }
         }
 
-def get_ip():
-    container_instances = ecs.list_container_instances(
+def get_info (task_arns):
+    describe_tasks_resp = ecs.describe_tasks(
         cluster = os.getenv("CLUSTER_ARN"),
+        tasks = task_arns,
     )
 
-    if len(container_instances['containerInstanceArns']) == 0:
-        return None
-
-    descriptions = ecs.describe_container_instances(
-        cluster = os.getenv("CLUSTER_ARN"),
-        containerInstances = container_instances['containerInstanceArns'],
+    task_info = map(
+        lambda t: {
+            key: t[key]
+            for key in ['createdAt', 'desiredStatus', 'executionStoppedAt','healthStatus','lastStatus','startedAt','stopCode','stoppedAt','stoppedReason']
+            if key in t
+        },
+        describe_tasks_resp['tasks'],
     )
 
-    instanceIds = list(map(
-        lambda d: d['ec2InstanceId'],
-        descriptions['containerInstances']))
-
-
-    ec2_instances = ec2.describe_instances(
-        InstanceIds = instanceIds,
-    )
+    container_instance_arns = [
+        t['containerInstanceArn']
+        for t in describe_tasks_resp['tasks']
+        if 'containerInstanceArn' in t
+    ]
 
     ips = []
 
-    for r in ec2_instances['Reservations']:
-        for i in r['Instances']:
-            for n in i['NetworkInterfaces']:
-                for p in n['PrivateIpAddresses']:
-                    ips.append(p['Association']['PublicIp'])
+    if len(list(container_instance_arns)) > 0:
+        describe_container_instances_resp = ecs.describe_container_instances(
+            cluster = os.getenv("CLUSTER_ARN"),
+            containerInstances = list(container_instance_arns),
+        )
 
-    return ips
+        ec2_instance_ids = [
+            d['ec2InstanceId']
+            for d in describe_container_instances_resp['containerInstances']
+            if 'ec2InstanceId' in d
+        ]
+
+        describe_instances_resp = ec2.describe_instances(
+            InstanceIds = list(ec2_instance_ids),
+        )
+
+        for r in describe_instances_resp['Reservations']:
+            for i in r['Instances']:
+                for n in i['NetworkInterfaces']:
+                    for p in n['PrivateIpAddresses']:
+                        ips.append(p['Association']['PublicIp'])
+
+    return {
+        "tasks": list(task_info),
+        "ips": ips,
+    }
+
+if __name__ == '__main__':
+    print(handler(None, None))
