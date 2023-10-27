@@ -1,11 +1,11 @@
 import os
 import boto3
+import json
 
 ecs = boto3.client("ecs")
 ec2 = boto3.client("ec2")
 
 def handler (event, callback):
-    print("startup lambda invoked")
     tasks = ecs.list_tasks(
         cluster = os.getenv("CLUSTER_ARN"),
     )
@@ -16,11 +16,21 @@ def handler (event, callback):
             taskDefinition = os.getenv("TASK_ARN"),
             count = 1,
         )
-        print("No tasks running. Starting server")
+        return {
+            'statusCode': 200,
+            'body': {
+                "message": "Starting the server. Plese wait about 4-6 minutes.",
+            }
+        }
     else:
-        print("Tasks running. ", tasks)
-        ip = get_ip()
-        print("IP info", ip)
+        ips = get_ip()
+        return {
+            'statusCode': 200,
+            'body': {
+                "message": "There's a task running so not starting.",
+                "ips": ips,
+            }
+        }
 
 def get_ip():
     container_instances = ecs.list_container_instances(
@@ -35,15 +45,21 @@ def get_ip():
         containerInstances = container_instances['containerInstanceArns'],
     )
 
-    print(descriptions)
     instanceIds = list(map(
         lambda d: d['ec2InstanceId'],
         descriptions['containerInstances']))
 
-    print(instanceIds)
+
     ec2_instances = ec2.describe_instances(
         InstanceIds = instanceIds,
     )
 
-if __name__ == '__main__':
-    handler(None, None)
+    ips = []
+
+    for r in ec2_instances['Reservations']:
+        for i in r['Instances']:
+            for n in i['NetworkInterfaces']:
+                for p in n['PrivateIpAddresses']:
+                    ips.append(p['Association']['PublicIp'])
+
+    return ips
