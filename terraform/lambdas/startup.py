@@ -1,9 +1,14 @@
 import os
 import boto3
 import json
+import datetime
 
 ecs = boto3.client("ecs")
 ec2 = boto3.client("ec2")
+
+def JsonDatetime(o):
+  if isinstance(o, datetime.datetime):
+    return o.isoformat()
 
 def handler (event, callback):
     list_tasks_resp = ecs.list_tasks(
@@ -17,21 +22,24 @@ def handler (event, callback):
             taskDefinition = os.getenv("TASK_ARN"),
             count = 1,
         )
-        return {
-            'statusCode': 200,
-            'body': {
-                "message": "Starting the server. Plese wait about 4-6 minutes.",
-            }
+        body = {
+            "message": "Starting the server. Plese wait about 4-6 minutes.",
         }
     else:
         info = get_info(task_arns)
-        return {
-            'statusCode': 200,
-            'body': {
-                "message": "There's a task running so not starting.",
-                "info": info,
-            }
+        body = {
+            "message": "There's a task running so not starting.",
+            "info": info,
         }
+
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps(body, default = JsonDatetime),
+    }
+
 
 def get_info (task_arns):
     describe_tasks_resp = ecs.describe_tasks(
@@ -42,7 +50,7 @@ def get_info (task_arns):
     task_info = map(
         lambda t: {
             key: t[key]
-            for key in ['createdAt', 'desiredStatus', 'executionStoppedAt','healthStatus','lastStatus','startedAt','stopCode','stoppedAt','stoppedReason']
+            for key in ['createdAt', 'desiredStatus', 'executionStoppedAt','lastStatus','startedAt','stopCode','stoppedAt','stoppedReason']
             if key in t
         },
         describe_tasks_resp['tasks'],

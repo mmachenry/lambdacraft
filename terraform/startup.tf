@@ -41,6 +41,16 @@ data "aws_iam_policy_document" "startup_lambda" {
 
   statement {
     actions = [
+      "ecs:ListTasks",
+      "ecs:DescribeTasks",
+      "ecs:DescribeContainerInstances",
+      "ec2:DescribeInstances",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
       "iam:PassRole",
     ]
     resources = [
