@@ -17,14 +17,20 @@ def handler (event, callback):
     task_arns = list_tasks_resp['taskArns']
 
     if len(task_arns) == 0:
-        response = ecs.run_task(
-            cluster = os.getenv("CLUSTER_ARN"),
-            taskDefinition = os.getenv("TASK_ARN"),
-            count = 1,
-        )
-        body = {
-            "message": "Starting the server. Plese wait about 4-6 minutes.",
-        }
+        dryrun = event.get('dryrun')
+        if dryrun:
+            body = {
+                "message": "No server is running."
+            }
+        else:
+            response = ecs.run_task(
+                cluster = os.getenv("CLUSTER_ARN"),
+                taskDefinition = os.getenv("TASK_ARN"),
+                count = 1,
+            )
+            body = {
+                "message": "Starting the server. Plese wait about 4-6 minutes.",
+            }
     else:
         info = get_info(task_arns)
         body = {
