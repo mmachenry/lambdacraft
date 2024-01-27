@@ -1,6 +1,9 @@
 resource "aws_apigatewayv2_api" "game_management" {
   name          = "game_management"
   protocol_type = "HTTP"
+  cors_configuration {
+    allow_origins = ["*"]
+  }
 }
 
 resource "aws_apigatewayv2_stage" "prod" {
