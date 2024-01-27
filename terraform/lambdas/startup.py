@@ -17,12 +17,11 @@ def handler (event, callback):
     task_arns = list_tasks_resp['taskArns']
 
     if len(task_arns) == 0:
-        dryrun = event.get('dryrun')
-        if dryrun:
+        if event['httpMethod'] == 'GET':
             body = {
                 "message": "No server is running."
             }
-        else:
+        elif event['httpMethod'] == 'POST':
             response = ecs.run_task(
                 cluster = os.getenv("CLUSTER_ARN"),
                 taskDefinition = os.getenv("TASK_ARN"),

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import moment from 'moment'
+import Button from '@mui/material/Button'
 
 const url = "https://oa5ejfbo46.execute-api.us-east-1.amazonaws.com/prod/start_server"
 
@@ -13,9 +14,17 @@ interface IStatus {
 function App() {
   const [status, setStatus] = useState<IStatus|null>(null)
 
-  axios.get(url).then((response) => {
-    setStatus(response.data)
-  })
+  const startServer = () => {
+    axios.post(url).then((response) => {
+      setStatus(response.data)
+    })
+  }
+
+  useEffect(() => {
+    axios.get(url).then((response) => {
+      setStatus(response.data)
+    })
+  }, [])
 
   return (
     <>
@@ -30,6 +39,7 @@ function App() {
         <p>{status?.info?.ips[0]}</p>
       </>
       )}
+      <Button onClick={startServer}>Start Server</Button>
     </>
   )
 }

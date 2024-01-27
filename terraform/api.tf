@@ -38,9 +38,15 @@ resource "aws_apigatewayv2_integration" "start_server" {
   payload_format_version = "2.0"
 }
 
-resource "aws_apigatewayv2_route" "start_server" {
+resource "aws_apigatewayv2_route" "get_start_server" {
   api_id    = aws_apigatewayv2_api.game_management.id
   route_key = "GET /start_server"
+  target    = "integrations/${aws_apigatewayv2_integration.start_server.id}"
+}
+
+resource "aws_apigatewayv2_route" "post_start_server" {
+  api_id    = aws_apigatewayv2_api.game_management.id
+  route_key = "POST /start_server"
   target    = "integrations/${aws_apigatewayv2_integration.start_server.id}"
 }
 
