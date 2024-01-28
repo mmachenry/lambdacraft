@@ -10,18 +10,19 @@ def JsonDatetime(o):
   if isinstance(o, datetime.datetime):
     return o.isoformat()
 
-def handler (event, callback):
+def handler (event, context):
     list_tasks_resp = ecs.list_tasks(
         cluster = os.getenv("CLUSTER_ARN"),
     )
     task_arns = list_tasks_resp['taskArns']
 
     if len(task_arns) == 0:
-        if event['httpMethod'] == 'GET':
+        method = event['requestContext']['http']['method']
+        if method == 'GET':
             body = {
                 "message": "No server is running."
             }
-        elif event['httpMethod'] == 'POST':
+        elif method == 'POST':
             response = ecs.run_task(
                 cluster = os.getenv("CLUSTER_ARN"),
                 taskDefinition = os.getenv("TASK_ARN"),
