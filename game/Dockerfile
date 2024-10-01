@@ -5,7 +5,7 @@ COPY stack.yaml package.yaml ./
 COPY Main.hs .
 RUN stack ghc --system-ghc --package hdaemonize -- -optl-static Main.hs
 
-FROM itzg/minecraft-server:latest
+FROM itzg/minecraft-server:java21
 COPY --from=haskell /opt/build/Main /Main
 COPY start_monitor_and_server /
 RUN chmod a+x /start_monitor_and_server
