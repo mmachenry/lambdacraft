@@ -280,10 +280,12 @@ resource "aws_ecs_task_definition" "game" {
       cpu       = 0
       essential = true
       mountPoints = [
+/*
         {
           containerPath = "/data",
           sourceVolume  = "world"
         }
+*/
       ],
       environment = [
         {
