@@ -12,7 +12,7 @@ variable "log_retention" {
 
 variable "game_vm_type" {
   description = "EC2 machine type on which to run the game server."
-  default     = "t4g.small"
+  default     = "t3.medium"
   type        = string
 }
 
