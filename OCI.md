@@ -56,8 +56,8 @@ picker. You'll download a zip of zips. Expand those into ~/minecraft/world/datap
 * 'name colors v1.0.12 (MC 1.21-1.21.10).zip'
 * 'nether portal coords v1.1.14 (MC 1.21-1.21.10).zip'
 * 'player head drops v1.1.14 (MC 1.21-1.21.10).zip'
- * players-drop-heads-1.21.9-88.0.zip
- * players-drop-heads-88.0.jar
+* players-drop-heads-1.21.9-88.0.zip
+* players-drop-heads-88.0.jar
 * 'silence mobs v1.2.8 (MC 1.21-1.21.10).zip'
 * 'spawning spheres v1.1.14 (MC 1.21-1.21.10).zip'
 * 'track raw statistics v1.7.10 (MC 1.21-1.21.10).zip'
