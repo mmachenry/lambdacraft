@@ -63,3 +63,20 @@ picker. You'll download a zip of zips. Expand those into ~/minecraft/world/datap
 * 'track raw statistics v1.7.10 (MC 1.21-1.21.10).zip'
 * 'track statistics v1.1.16 (MC 1.21-1.21.10).zip'
 * 'villager workstation highlights v1.1.14 (MC 1.21-1.21.10).zip'
+
+Server upgrade process
+---
+When Mojang releases a new version of Minecraft we need to download the new jar. Search for the
+fabric release of the latest update. Delete /home/opc/minecraft/fabric...jar and then put the new
+one in that directory. Then edit /etc/systemd/system/minecraft.service to name the correct jar file.
+After that reload the service and restart it.
+
+    sudo systemctl stop minecraft
+    rm ~/minecraft/fabric*.jar
+    # scp file to ~/minecraft/
+    sudo vi /etc/systemd/system/minecraft.service
+    sudo systemctl daemon-reload
+
+It's likely that several mods will not be compatible. You can download the new updated versions.
+It's okay to run without the mods if they lag behind in updates because our mods are just for
+chunk loading and the often not noticed lead strengthening mod.
