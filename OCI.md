@@ -7,8 +7,8 @@ To login to ssh to the server
 
 To start or restart the server
 
-    systemctl --user start minecraft
-    systemctl --user restart minecraft
+    sudo systemctl start minecraft
+    sudo systemctl restart minecraft
 
 RCON
 
